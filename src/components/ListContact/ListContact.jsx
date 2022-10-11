@@ -1,14 +1,14 @@
 import { ItemList, ItemListButton, ItemListParagr } from './ListContact.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { getContact } from 'redux/contactsSlice';
+import { selectContact } from 'redux/contactsSlice';
 import { fetchRemoveContact } from 'redux/operations';
-import { getFilterSelector } from 'redux/filterSlice';
+import { selectFilter } from 'redux/filterSlice';
 
 export const Renderlist = () => {
   const dispatch = useDispatch();
-  const handleClickRemove = id => dispatch(fetchRemoveContact(id));
-  const selectorContact = useSelector(getContact);
-  const selectorFilter = useSelector(getFilterSelector);
+  const handleClickRemove = removeId => dispatch(fetchRemoveContact(removeId));
+  const selectorContact = useSelector(selectContact);
+  const selectorFilter = useSelector(selectFilter);
 
   const renderContact = selectorContact.filter(item =>
     item.name.toLowerCase().includes(selectorFilter)
@@ -17,7 +17,6 @@ export const Renderlist = () => {
   return (
     renderContact.length > 0 &&
     renderContact.map(item => {
-      console.log(item);
       return (
         <ItemList key={item.id}>
           <ItemListParagr>
@@ -25,7 +24,7 @@ export const Renderlist = () => {
           </ItemListParagr>
           <ItemListButton
             type="button"
-            onClick={() => handleClickRemove(item.id)}
+            onClick={() => handleClickRemove(Number(item.id))}
           >
             Delete
           </ItemListButton>

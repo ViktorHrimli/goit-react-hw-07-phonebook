@@ -6,7 +6,7 @@ import { Formik, ErrorMessage } from 'formik';
 import { Box } from 'commonStyle/Common.styled';
 import { FormContact, FormLabel, Input, FormButton, Eror } from './Form.styled';
 import { fetchAddContacts } from 'redux/operations';
-import { getContact } from 'redux/contactsSlice';
+import { selectContact } from 'redux/contactsSlice';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required(),
@@ -17,18 +17,18 @@ const initialValue = { name: '', number: '' };
 
 export const Formes = () => {
   const dispatch = useDispatch();
-  const contact = useSelector(getContact);
+  const contact = useSelector(selectContact);
 
   const hendleSubmit = (values, { resetForm }) => {
     addContacsFormSubmit(values);
     resetForm();
   };
 
-  const addContacsFormSubmit = ({ name, number }) => {
-    if (contact.find(item => item.name === name)) {
-      return Notiflix.Notify.warning(`${name} is already is contacts`);
+  const addContacsFormSubmit = value => {
+    if (contact.find(item => item.name === value.name)) {
+      return Notiflix.Notify.warning(`${value.name} is already is contacts`);
     } else {
-      dispatch(fetchAddContacts(name, number));
+      dispatch(fetchAddContacts(value));
     }
   };
 

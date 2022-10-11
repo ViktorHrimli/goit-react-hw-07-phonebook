@@ -1,47 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
-
 import {
   fetchAllContacts,
   fetchAddContacts,
   fetchRemoveContact,
 } from './operations';
 
-// const contactSlice = createSlice({
-//   name: 'contacts',
-//   initialState: { contact: [] },
-//   reducers: {
-//     addContact: {
-//       reducer(state, action) {
-//         state.contact.push(action.payload);
-//       },
-//       prepare(name, number) {
-//         return {
-//           payload: {
-//             id: nanoid(),
-//             name,
-//             number,
-//           },
-//         };
-//       },
-//     },
-//     removeContact(state, action) {
-//       state.contact = state.contact.filter(item => item.id !== action.payload);
-//     },
-//   },
-// });
+const pendingStatus = ({ contact }) => {
+  contact.isLoading = true;
+};
 
-// export const { addContact, removeContact } = contactSlice.actions;
-
-// const persistConfig = {
-//   key: 'rootContact',
-//   storage,
-//   whitelist: ['contact'],
-// };
-
-// export const presistContactReducer = persistReducer(
-//   persistConfig,
-//   contactReducer
-// );
+const rejectedStatus = ({ contact }, action) => {
+  contact.isLoading = false;
+  contact.error = action.payload;
+};
 
 export const contactSlice = createSlice({
   name: 'contacts',
@@ -53,29 +24,31 @@ export const contactSlice = createSlice({
     },
   },
   extraReducers: {
-    [fetchAllContacts.pending]({ contact }, _) {
-      contact.isLoading = true;
-    },
-    [fetchAllContacts.fulfilled](state, action) {
-      state.contact.isLoading = false;
-      state.contact.error = null;
-      state.contact.items = action.payload;
-    },
-    [fetchAllContacts.rejected]({ contact }, action) {
+    [fetchAllContacts.pending]: pendingStatus,
+    [fetchAddContacts.pending]: pendingStatus,
+    [fetchRemoveContact.pending]: pendingStatus,
+    [fetchAllContacts.rejected]: rejectedStatus,
+    [fetchAddContacts.rejected]: rejectedStatus,
+    [fetchRemoveContact.rejected]: rejectedStatus,
+
+    [fetchAllContacts.fulfilled]({ contact }, action) {
       contact.isLoading = false;
-      contact.error = action.payload;
+      contact.error = null;
+      contact.items = action.payload;
     },
-    [fetchAddContacts.pending]({ contact }, _) {
-      contact.isLoading = true;
-    },
-    [fetchAddContacts.fulfilled](state, action) {
-      state.contact.isLoading = false;
-      state.contact.error = null;
-      state.contact.items.push(action.payload);
-    },
-    [fetchAddContacts.rejected]({ contact }, action) {
+
+    [fetchAddContacts.fulfilled]({ contact }, action) {
       contact.isLoading = false;
-      contact.error = action.payload;
+      contact.error = null;
+      contact.items.push(action.payload);
+    },
+
+    [fetchRemoveContact.fulfilled]({ contact }, action) {
+      contact.isLoading = false;
+      contact.error = null;
+      contact.items = contact.items.filter(
+        item => item.id !== action.payload.id
+      );
     },
   },
 });
@@ -83,4 +56,4 @@ export const contactSlice = createSlice({
 export const contactReducer = contactSlice.reducer;
 
 // Selecotrs
-export const getContact = state => state.contacts.contact.items;
+export const selectContact = state => state.contacts.contact.items;
